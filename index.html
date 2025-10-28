@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kurumi - 轻量级可嵌入聊天助手组件</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <script src="./static/js/tailwindcss@3.4.17.js"></script>
+    <link href="./static/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+    <script src="./static/js/chart.js@4.4.8.js"></script>
     <script>
         // Tailwind 配置
         tailwind.config = {
@@ -53,7 +53,7 @@
     <header class="fixed w-full top-0 z-50 bg-white/90 dark:bg-dark-elevated/90 backdrop-blur-sm shadow-sm">
         <div class="container mx-auto px-4 py-4 flex items-center justify-between">
             <div class="flex items-center space-x-2">
-                <img src="kurumi.png" alt="Kurumi Logo" class="h-10 w-10 rounded-full">
+                <img src="./static/images/kurumi.png" alt="Kurumi Logo" class="h-10 w-10 rounded-full">
                 <h1 class="text-2xl font-bold text-primary">Kurumi</h1>
             </div>
             
@@ -101,7 +101,7 @@
                     </div>
                     <div class="flex items-center space-x-6 pt-4">
                         <div class="flex -space-x-2">
-                            <img src="kurumi.png" alt="Logo" class="w-10 h-10 rounded-full border-2 border-white dark:border-dark-elevated">
+                            <img src="./static/images/kurumi.png" alt="Logo" class="w-10 h-10 rounded-full border-2 border-white dark:border-dark-elevated">
                         </div>
                         <div class="text-sm text-gray-600 dark:text-gray-400">
                             开源社区 <span class="font-bold">持续成长</span> 中
@@ -113,7 +113,7 @@
                         <div class="absolute -top-6 -left-6 w-full h-full bg-primary/20 rounded-2xl rotate-3"></div>
                         <div class="absolute -bottom-6 -right-6 w-full h-full bg-blue-200 dark:bg-primary/10 rounded-2xl -rotate-3"></div>
                         <div class="relative bg-white dark:bg-dark-elevated rounded-xl shadow-2xl overflow-hidden border border-gray-200 dark:border-dark-border hover-scale">
-                            <img src="logo.gif" alt="Kurumi Chat Interface" class="w-full h-auto rounded-lg">
+                            <img src="./static/images/logo.gif" alt="Kurumi Chat Interface" class="w-full h-auto rounded-lg">
                         </div>
                     </div>
                 </div>
@@ -313,7 +313,7 @@
                 <!-- 截图 1 -->
                 <div class="bg-white dark:bg-dark-elevated p-4 rounded-xl shadow-xl border border-gray-200 dark:border-dark-border hover-scale">
                     <div class="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden bg-gray-100 dark:bg-dark-border">
-                        <img src="1.png" alt="Kurumi Light Mode" class="w-full h-full object-cover">
+                        <img src="./static/images/1.png" alt="Kurumi Light Mode" class="w-full h-full object-cover">
                     </div>
                     <h3 class="text-xl font-bold mt-6 mb-2 text-center">明亮模式</h3>
                     <p class="text-gray-600 dark:text-gray-400 text-center">清爽简洁的明亮主题，适合日常使用</p>
@@ -322,7 +322,7 @@
                 <!-- 截图 2 -->
                 <div class="bg-white dark:bg-dark-elevated p-4 rounded-xl shadow-xl border border-gray-200 dark:border-dark-border hover-scale">
                     <div class="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden bg-gray-100 dark:bg-dark-border">
-                        <img src="2.png" alt="Kurumi Dark Mode" class="w-full h-full object-cover">
+                        <img src="./static/images/2.png" alt="Kurumi Dark Mode" class="w-full h-full object-cover">
                     </div>
                     <h3 class="text-xl font-bold mt-6 mb-2 text-center">暗黑模式</h3>
                     <p class="text-gray-600 dark:text-gray-400 text-center">护眼的暗黑主题，适合夜间使用</p>
@@ -331,7 +331,7 @@
                 <!-- 截图 3 -->
                 <div class="bg-white dark:bg-dark-elevated p-4 rounded-xl shadow-xl border border-gray-200 dark:border-dark-border hover-scale">
                     <div class="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden bg-gray-100 dark:bg-dark-border">
-                        <img src="3.png" alt="Kurumi Features" class="w-full h-full object-cover">
+                        <img src="./static/images/3.png" alt="Kurumi Features" class="w-full h-full object-cover">
                     </div>
                     <h3 class="text-xl font-bold mt-6 mb-2 text-center">多模态交互</h3>
                     <p class="text-gray-600 dark:text-gray-400 text-center">支持文本和图片输入，实现更丰富的交互</p>
@@ -340,7 +340,7 @@
                 <!-- 截图 4 -->
                 <div class="bg-white dark:bg-dark-elevated p-4 rounded-xl shadow-xl border border-gray-200 dark:border-dark-border hover-scale">
                     <div class="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden bg-gray-100 dark:bg-dark-border">
-                        <img src="4.png" alt="Kurumi Markdown" class="w-full h-full object-cover">
+                        <img src="./static/images/4.png" alt="Kurumi Markdown" class="w-full h-full object-cover">
                     </div>
                     <h3 class="text-xl font-bold mt-6 mb-2 text-center">Markdown 渲染</h3>
                     <p class="text-gray-600 dark:text-gray-400 text-center">自动渲染 Markdown 格式，支持代码高亮</p>
@@ -510,7 +510,7 @@
         <div class="container mx-auto max-w-6xl">
             <div class="flex flex-col md:flex-row justify-between items-center mb-8">
                 <div class="flex items-center space-x-2 mb-6 md:mb-0">
-                    <img src="kurumi.png" alt="Kurumi Logo" class="h-10 w-10 rounded-full">
+                    <img src="./static/images/kurumi.png" alt="Kurumi Logo" class="h-10 w-10 rounded-full">
                     <h2 class="text-2xl font-bold text-primary">Kurumi</h2>
                 </div>
                 
