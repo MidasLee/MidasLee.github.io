@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KurumiShell - 集成SSH、Docker、Markdown的全能开发运维工具</title>
+    <script src="./static/js/tailwindcss@3.4.17.js"></script>
+    <link href="./static/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+    <script src="./static/js/chart.js@4.4.8.js"></script>
+    <script>
+        // Tailwind 配置
+        tailwind.config = {
+            darkMode: 'class', // 启用基于类的dark模式
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#6366f1', // 改为靛蓝色系，区分原Kurumi
+                        secondary: '#6c757d',
+                        dark: {
+                            base: '#121212',
+                            elevated: '#1e1e1e',
+                            border: '#2d2d2d'
+                        },
+                        ssh: '#3b82f6',
+                        docker: '#22c55e',
+                        markdown: '#ec4899'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .transition-custom {
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .hover-scale {
+                transition: transform 0.3s ease;
+            }
+            .hover-scale:hover {
+                transform: scale(1.02);
+            }
+            .tech-badge {
+                @apply px-3 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-dark-border text-gray-700 dark:text-gray-300;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 dark:bg-dark-base dark:text-gray-100 transition-custom">
+    <header class="fixed w-full top-0 z-50 bg-white/90 dark:bg-dark-elevated/90 backdrop-blur-sm shadow-sm">
+        <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <img src="./static/images/kurumi-shell.png" alt="KurumiShell Logo" class="h-10 w-10 rounded-full">
+                <h1 class="text-2xl font-bold text-primary">KurumiShell</h1>
+            </div>
+            
+            <nav class="hidden md:flex items-center space-x-8">
+                <a href="#features" class="font-medium hover:text-primary transition-custom">核心功能</a>
+                <a href="#tech-stack" class="font-medium hover:text-primary transition-custom">技术栈</a>
+                <a href="#structure" class="font-medium hover:text-primary transition-custom">项目结构</a>
+                <a href="#quick-start" class="font-medium hover:text-primary transition-custom">快速开始</a>
+                <a href="#configuration" class="font-medium hover:text-primary transition-custom">配置说明</a>
+                <a href="https://github.com/MidasLee/KurumiShell" target="_blank" rel="noopener noreferrer" class="flex items-center space-x-2 bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg transition-custom">
+                    <i class="fa fa-github"></i>
+                    <span>GitHub</span>
+                </a>
+            </nav>
+            
+            <div class="flex items-center space-x-4">
+                <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-dark-border transition-custom">
+                    <i class="fa fa-moon-o dark:hidden"></i>
+                    <i class="fa fa-sun-o hidden dark:inline-block"></i>
+                </button>
+                <button class="md:hidden p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-dark-border transition-custom">
+                    <i class="fa fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- 英雄区域 -->
+    <section class="pt-32 pb-20 px-4 bg-gradient-to-b from-indigo-50 to-white dark:from-dark-elevated dark:to-dark-base">
+        <div class="container mx-auto max-w-6xl">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-12">
+                <div class="md:w-1/2 space-y-6">
+                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-shadow">
+                        <span class="text-primary">KurumiShell</span> - 全能开发运维工具集
+                    </h1>
+                    <p class="text-lg text-gray-600 dark:text-gray-300">
+                        集成SSH连接管理、Docker镜像搜索和Markdown笔记管理，基于Vue 3 + Spring Boot构建的现代化开发运维平台。
+                    </p>
+                    <div class="flex flex-wrap gap-4">
+                        <a href="#quick-start" class="bg-primary hover:bg-primary/90 text-white font-medium px-8 py-3 rounded-lg transition-custom flex items-center space-x-2 hover-scale">
+                            <i class="fa fa-rocket"></i>
+                            <span>立即开始</span>
+                        </a>
+                        <a href="https://github.com/MidasLee/KurumiShell" target="_blank" rel="noopener noreferrer" class="bg-white dark:bg-dark-elevated hover:bg-gray-100 dark:hover:bg-dark-border text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-dark-border font-medium px-8 py-3 rounded-lg transition-custom flex items-center space-x-2 hover-scale">
+                            <i class="fa fa-github"></i>
+                            <span>查看源码</span>
+                        </a>
+                    </div>
+                    <div class="flex flex-wrap gap-2 pt-4">
+                        <span class="tech-badge">Vue 3</span>
+                        <span class="tech-badge">Spring Boot</span>
+                        <span class="tech-badge">Kotlin</span>
+                        <span class="tech-badge">TypeScript</span>
+                        <span class="tech-badge">WebSocket</span>
+                    </div>
+                </div>
+                <div class="md:w-1/2">
+                    <div class="relative">
+                        <div class="absolute -top-6 -left-6 w-full h-full bg-primary/20 rounded-2xl rotate-3"></div>
+                        <div class="absolute -bottom-6 -right-6 w-full h-full bg-indigo-200 dark:bg-primary/10 rounded-2xl -rotate-3"></div>
+                        <div class="relative bg-white dark:bg-dark-elevated rounded-xl shadow-2xl overflow-hidden border border-gray-200 dark:border-dark-border hover-scale">
+                            <img src="./static/images/kurumi-shell.png" alt="KurumiShell Main Interface" class="w-full h-auto rounded-lg">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 核心功能 -->
+    <section id="features" class="py-20 px-4">
+        <div class="container mx-auto max-w-6xl">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">核心功能特点</h2>
+                <p class="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+                    KurumiShell 提供一站式开发运维工具，满足您的日常开发和服务器管理需求
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- SSH连接管理 -->
+                <div class="bg-white dark:bg-dark-elevated p-8 rounded-xl shadow-lg border border-gray-200 dark:border-dark-border hover-scale">
+                    <div class="w-14 h-14 bg-ssh/10 dark:bg-ssh/20 rounded-lg flex items-center justify-center mb-6">
+                        <i class="fa fa-terminal text-2xl text-ssh"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">SSH连接管理</h3>
+                    <ul class="space-y-2 text-gray-600 dark:text-gray-400">
+                        <li class="flex items-start space-x-2">
+                            <i class="fa fa-check text-ssh mt-1"></i>
+                            <span>分组管理SSH连接配置</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <i class="fa fa-check text-ssh mt-1"></i>
+                            <span>基于WebSocket的SSH终端</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <i class="fa fa-check text-ssh mt-1"></i>
+                            <span>远程文件上传下载管理</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <i class="fa fa-check text-ssh mt-1"></i>
+                            <span>实时监控服务器资源使用</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Docker工具 -->
+                <div class="bg-white dark:bg-dark-elevated p-8 rounded-xl shadow-lg border border-gray-200 dark:border-dark-border hover-scale">
+                    <div class="w-14 h-14 bg-docker/10 dark:bg-docker/20 rounded-lg flex items-center justify-center mb-6">
+                        <i class="fa fa-cubes text-2xl text-docker"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Docker镜像工具</h3>
+                    <ul class="space-y-2 text-gray-600 dark:text-gray-400">
+                        <li class="flex items-start space-x-2">
+                            <i class="fa fa-check text-docker mt-1"></i>
+                            <span>渡渡鸟镜像仓库搜索</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <i class="fa fa-check text-docker mt-1"></i>
+                            <span>轩辕镜像仓库搜索</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <i class="fa fa-check text-docker mt-1"></i>
+                            <span>提供镜像拉取命令</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <i class="fa fa-check text-docker mt-1"></i>
+                            <span>多仓库镜像对比</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Markdown笔记 -->
+                <div class="bg-white dark:bg-dark-elevated p-8 rounded-xl shadow-lg border border-gray-200 dark:border-dark-border hover-scale">
+                    <div class="w-14 h-14 bg-markdown/10 dark:bg-markdown/20 rounded-lg flex items-center justify-center mb-6">
+                        <i class="fa fa-file-text-o text-2xl text-markdown"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Markdown笔记管理</h3>
+                    <ul class="space-y-2 text-gray-600 dark:text-gray-400">
+                        <li class="flex items-start space-x-2">
+                            <i class="fa fa-check text-markdown mt-1"></i>
+                            <span>文件夹分类管理笔记</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <i class="fa fa-check text-markdown mt-1"></i>
+                            <span>实时预览Markdown渲染</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <i class="fa fa-check text-markdown mt-1"></i>
+                            <span>代码高亮和富文本展示</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <i class="fa fa-check text-markdown mt-1"></i>
+                            <span>笔记数量数据统计</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- 现代化UI -->
+                <div class="bg-white dark:bg-dark-elevated p-8 rounded-xl shadow-lg border border-gray-200 dark:border-dark-border hover-scale">
+                    <div class="w-14 h-14 bg-primary/10 dark:bg-primary/20 rounded-lg flex items-center justify-center mb-6">
+                        <i class="fa fa-desktop text-2xl text-primary"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">现代化UI界面</h3>
+                    <ul class="space-y-2 text-gray-600 dark:text-gray-400">
+                        <li class="flex items-start space-x-2">
+                            <i class="fa fa-check text-primary mt-1"></i>
+                            <span>基于Vue 3 + Naive UI构建</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <i class="fa fa-check text-primary mt-1"></i>
+                            <span>响应式设计适配多设备</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <i class="fa fa-check text-primary mt-1"></i>
+                            <span>暗黑模式和明亮模式切换</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <i class="fa fa-check text-primary mt-1"></i>
+                            <span>直观的数据可视化图表</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- 实时通信 -->
+                <div class="bg-white dark:bg-dark-elevated p-8 rounded-xl shadow-lg border border-gray-200 dark:border-dark-border hover-scale">
+                    <div class="w-14 h-14 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center mb-6">
+                        <i class="fa fa-exchange text-2xl text-blue-600 dark:text-blue-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">实时通信</h3>
+                    <ul class="space-y-2 text-gray-600 dark:text-gray-400">
+                        <li class="flex items-start space-x-2">
+                            <i class="fa fa-check text-blue-600 dark:text-blue-400 mt-1"></i>
+                            <span>WebSocket实现SSH终端</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <i class="fa fa-check text-blue-600 dark:text-blue-400 mt-1"></i>
+                            <span>实时服务器资源监控</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <i class="fa fa-check text-blue-600 dark:text-blue-400 mt-1"></i>
+                            <span>低延迟数据传输</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <i class="fa fa-check text-blue-600 dark:text-blue-400 mt-1"></i>
+                            <span>断线重连机制</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- 数据统计 -->
+                <div class="bg-white dark:bg-dark-elevated p-8 rounded-xl shadow-lg border border-gray-200 dark:border-dark-border hover-scale">
+                    <div class="w-14 h-14 bg-purple-100 dark:bg-purple-900/20 rounded-lg flex items-center justify-center mb-6">
+                        <i class="fa fa-bar-chart text-2xl text-purple-600 dark:text-purple-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">数据统计分析</h3>
+                    <ul class="space-y-2 text-gray-600 dark:text-gray-400">
+                        <li class="flex items-start space-x-2">
+                            <i class="fa fa-check text-purple-600 dark:text-purple-400 mt-1"></i>
+                            <span>SSH连接分组统计</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <i class="fa fa-check text-purple-600 dark:text-purple-400 mt-1"></i>
+                            <span>笔记文件夹数量统计</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <i class="fa fa-check text-purple-600 dark:text-purple-400 mt-1"></i>
+                            <span>服务器资源使用图表</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <i class="fa fa-check text-purple-600 dark:text-purple-400 mt-1"></i>
+                            <span>使用频率数据分析</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 界面展示 -->
+    <section id="showcase" class="py-20 px-4 bg-gray-50 dark:bg-dark-elevated">
+        <div class="container mx-auto max-w-6xl">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">界面展示</h2>
+                <p class="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+                    直观易用的界面设计，提升您的开发运维效率
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <!-- SSH终端 -->
+                <div class="bg-white dark:bg-dark-elevated p-4 rounded-xl shadow-xl border border-gray-200 dark:border-dark-border hover-scale">
+                    <div class="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden bg-gray-100 dark:bg-dark-border">
+                        <img src="./static/images/kurumishell1.png" alt="KurumiShell SSH Terminal" class="w-full h-full object-cover">
+                    </div>
+                    <h3 class="text-xl font-bold mt-6 mb-2 text-center">SSH终端</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-center">基于WebSocket的高性能SSH终端，支持各种命令操作</p>
+                </div>
+                
+                <!-- Docker镜像搜索 -->
+                <div class="bg-white dark:bg-dark-elevated p-4 rounded-xl shadow-xl border border-gray-200 dark:border-dark-border hover-scale">
+                    <div class="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden bg-gray-100 dark:bg-dark-border">
+                        <img src="./static/images/kurumishell2.png" alt="KurumiShell Docker Search" class="w-full h-full object-cover">
+                    </div>
+                    <h3 class="text-xl font-bold mt-6 mb-2 text-center">Docker镜像搜索</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-center">多仓库Docker镜像搜索，一键获取拉取命令</p>
+                </div>
+                
+                <!-- Markdown笔记 -->
+                <div class="bg-white dark:bg-dark-elevated p-4 rounded-xl shadow-xl border border-gray-200 dark:border-dark-border hover-scale">
+                    <div class="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden bg-gray-100 dark:bg-dark-border">
+                        <img src="./static/images/kurumishell3.png" alt="KurumiShell Markdown Editor" class="w-full h-full object-cover">
+                    </div>
+                    <h3 class="text-xl font-bold mt-6 mb-2 text-center">Markdown笔记编辑</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-center">实时预览的Markdown编辑器，支持代码高亮和富文本</p>
+                </div>
+                
+                <!-- 资源监控 -->
+                <div class="bg-white dark:bg-dark-elevated p-4 rounded-xl shadow-xl border border-gray-200 dark:border-dark-border hover-scale">
+                    <div class="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden bg-gray-100 dark:bg-dark-border">
+                        <img src="./static/images/kurumishell4.png" alt="KurumiShell Resource Monitor" class="w-full h-full object-cover">
+                    </div>
+                    <h3 class="text-xl font-bold mt-6 mb-2 text-center">服务器资源监控</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-center">实时监控服务器CPU、内存和磁盘使用情况</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 技术栈 -->
+    <section id="tech-stack" class="py-20 px-4">
+        <div class="container mx-auto max-w-6xl">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">技术栈</h2>
+                <p class="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+                    基于现代化技术构建，确保系统性能和可维护性
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+                <!-- 后端技术栈 -->
+                <div class="bg-white dark:bg-dark-elevated p-8 rounded-xl shadow-lg border border-gray-200 dark:border-dark-border">
+                    <h3 class="text-2xl font-bold mb-6 text-center text-ssh">后端技术栈</h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-center justify-between">
+                            <span class="font-medium">Kotlin</span>
+                            <span class="tech-badge">编程语言</span>
+                        </li>
+                        <li class="flex items-center justify-between">
+                            <span class="font-medium">Spring Boot</span>
+                            <span class="tech-badge">后端框架</span>
+                        </li>
+                        <li class="flex items-center justify-between">
+                            <span class="font-medium">Spring WebSocket</span>
+                            <span class="tech-badge">实时通信</span>
+                        </li>
+                        <li class="flex items-center justify-between">
+                            <span class="font-medium">JPA (Hibernate)</span>
+                            <span class="tech-badge">ORM框架</span>
+                        </li>
+                        <li class="flex items-center justify-between">
+                            <span class="font-medium">JJWT</span>
+                            <span class="tech-badge">认证授权</span>
+                        </li>
+                        <li class="flex items-center justify-between">
+                            <span class="font-medium">JSch</span>
+                            <span class="tech-badge">SSH连接</span>
+                        </li>
+                        <li class="flex items-center justify-between">
+                            <span class="font-medium">Gradle</span>
+                            <span class="tech-badge">构建工具</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- 前端技术栈 -->
+                <div class="bg-white dark:bg-dark-elevated p-8 rounded-xl shadow-lg border border-gray-200 dark:border-dark-border">
+                    <h3 class="text-2xl font-bold mb-6 text-center text-primary">前端技术栈</h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-center justify-between">
+                            <span class="font-medium">Vue 3</span>
+                            <span class="tech-badge">前端框架</span>
+                        </li>
+                        <li class="flex items-center justify-between">
+                            <span class="font-medium">TypeScript</span>
+                            <span class="tech-badge">类型检查</span>
+                        </li>
+                        <li class="flex items-center justify-between">
+                            <span class="font-medium">Naive UI</span>
+                            <span class="tech-badge">UI组件库</span>
+                        </li>
+                        <li class="flex items-center justify-between">
+                            <span class="font-medium">Vite</span>
+                            <span class="tech-badge">构建工具</span>
+                        </li>
+                        <li class="flex items-center justify-between">
+                            <span class="font-medium">Axios</span>
+                            <span class="tech-badge">HTTP客户端</span>
+                        </li>
+                        <li class="flex items-center justify-between">
+                            <span class="font-medium">ECharts</span>
+                            <span class="tech-badge">图表库</span>
+                        </li>
+                        <li class="flex items-center justify-between">
+                            <span class="font-medium">Xterm.js</span>
+                            <span class="tech-badge">终端模拟器</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- 爬虫技术栈 -->
+                <div class="bg-white dark:bg-dark-elevated p-8 rounded-xl shadow-lg border border-gray-200 dark:border-dark-border">
+                    <h3 class="text-2xl font-bold mb-6 text-center text-docker">爬虫技术栈</h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-center justify-between">
+                            <span class="font-medium">Python</span>
+                            <span class="tech-badge">编程语言</span>
+                        </li>
+                        <li class="flex items-center justify-between">
+                            <span class="font-medium">FastAPI</span>
+                            <span class="tech-badge">API框架</span>
+                        </li>
+                        <li class="flex items-center justify-between">
+                            <span class="font-medium">BeautifulSoup4</span>
+                            <span class="tech-badge">HTML解析</span>
+                        </li>
+                        <li class="flex items-center justify-between">
+                            <span class="font-medium">Requests</span>
+                            <span class="tech-badge">HTTP请求</span>
+                        </li>
+                        <li class="flex items-center justify-between">
+                            <span class="font-medium">Selenium</span>
+                            <span class="tech-badge">网页自动化</span>
+                        </li>
+                        <li class="flex items-center justify-between">
+                            <span class="font-medium">Uvicorn</span>
+                            <span class="tech-badge">ASGI服务器</span>
+                        </li>
+                        <li class="flex items-center justify-between">
+                            <span class="font-medium">WebSocket-Client</span>
+                            <span class="tech-badge">WebSocket客户端</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 项目结构 -->
+    <section id="structure" class="py-20 px-4 bg-gray-50 dark:bg-dark-elevated">
+        <div class="container mx-auto max-w-6xl">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">项目结构</h2>
+                <p class="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+                    清晰的项目结构设计，便于维护和扩展
+                </p>
+            </div>
+            
+            <div class="bg-white dark:bg-dark-elevated p-8 rounded-xl shadow-lg border border-gray-200 dark:border-dark-border overflow-x-auto">
+                <pre class="text-sm text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-dark-base p-6 rounded-lg"><code>KurumiShell/
+├── src/                # 后端源代码（Kotlin）
+│   ├── main/kotlin/per/midas/kurumishell/  # 后端主代码
+│   │   ├── entity/     # 实体类定义
+│   │   ├── repository/ # 数据访问层
+│   │   ├── service/    # 业务逻辑层
+│   │   ├── controller/ # API控制器
+│   │   ├── config/     # 配置类
+│   │   └── websocket/  # WebSocket相关实现
+│   └── test/           # 测试代码
+├── web/                # 前端项目（Vue 3）
+│   ├── src/            # 前端源代码
+│   │   ├── components/ # 通用组件
+│   │   ├── pages/      # 页面组件
+│   │   ├── services/   # API服务
+│   │   ├── App.vue     # 根组件
+│   │   └── main.ts     # 入口文件
+│   ├── package.json    # 前端依赖
+│   └── vite.config.ts  # Vite配置
+├── spider/             # 爬虫项目
+│   ├── dudubird-spider/ # 渡渡鸟镜像仓库爬虫
+│   └── xuanyuan-spider/ # 轩辕镜像仓库爬虫
+├── build.gradle.kts    # Gradle构建配置
+├── settings.gradle.kts # Gradle设置
+└── README.md           # 项目说明文档</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- 快速开始 -->
+    <section id="quick-start" class="py-20 px-4">
+        <div class="container mx-auto max-w-6xl">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">快速开始</h2>
+                <p class="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+                    简单几步，快速部署和使用 KurumiShell
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- 后端启动 -->
+                <div class="bg-white dark:bg-dark-elevated p-8 rounded-xl shadow-lg border border-gray-200 dark:border-dark-border">
+                    <div class="w-12 h-12 bg-ssh/10 dark:bg-ssh/20 rounded-lg flex items-center justify-center mb-6 mx-auto">
+                        <i class="fa fa-server text-xl text-ssh"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-6 text-center">后端启动</h3>
+                    
+                    <div class="space-y-6">
+                        <div>
+                            <h4 class="font-bold mb-2">1. 克隆代码</h4>
+                            <div class="bg-gray-100 dark:bg-dark-border p-3 rounded-lg overflow-x-auto">
+                                <code class="text-sm">git clone https://github.com/MidasLee/KurumiShell.git</code>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-bold mb-2">2. 进入项目目录</h4>
+                            <div class="bg-gray-100 dark:bg-dark-border p-3 rounded-lg overflow-x-auto">
+                                <code class="text-sm">cd KurumiShell</code>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-bold mb-2">3. 启动后端服务</h4>
+                            <div class="bg-gray-100 dark:bg-dark-border p-3 rounded-lg overflow-x-auto">
+                                <code class="text-sm">./gradlew bootRun</code>
+                            </div>
+                        </div>
+                        
+                        <div class="text-sm text-gray-600 dark:text-gray-400 mt-4">
+                            <i class="fa fa-info-circle text-primary mr-2"></i>
+                            确保已安装 JDK 17+ 和 Gradle 7+
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 前端启动 -->
+                <div class="bg-white dark:bg-dark-elevated p-8 rounded-xl shadow-lg border border-gray-200 dark:border-dark-border">
+                    <div class="w-12 h-12 bg-primary/10 dark:bg-primary/20 rounded-lg flex items-center justify-center mb-6 mx-auto">
+                        <i class="fa fa-desktop text-xl text-primary"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-6 text-center">前端启动</h3>
+                    
+                    <div class="space-y-6">
+                        <div>
+                            <h4 class="font-bold mb-2">1. 进入前端目录</h4>
+                            <div class="bg-gray-100 dark:bg-dark-border p-3 rounded-lg overflow-x-auto">
+                                <code class="text-sm">cd web</code>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-bold mb-2">2. 安装依赖</h4>
+                            <div class="bg-gray-100 dark:bg-dark-border p-3 rounded-lg overflow-x-auto">
+                                <code class="text-sm">npm install</code>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-bold mb-2">3. 启动开发服务器</h4>
+                            <div class="bg-gray-100 dark:bg-dark-border p-3 rounded-lg overflow-x-auto">
+                                <code class="text-sm">npm run dev</code>
+                            </div>
+                        </div>
+                        
+                        <div class="text-sm text-gray-600 dark:text-gray-400 mt-4">
+                            <i class="fa fa-info-circle text-primary mr-2"></i>
+                            访问: http://localhost:5666
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 爬虫启动 -->
+                <div class="bg-white dark:bg-dark-elevated p-8 rounded-xl shadow-lg border border-gray-200 dark:border-dark-border">
+                    <div class="w-12 h-12 bg-docker/10 dark:bg-docker/20 rounded-lg flex items-center justify-center mb-6 mx-auto">
+                        <i class="fa fa-spider text-xl text-docker"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-6 text-center">爬虫启动</h3>
+                    
+                    <div class="space-y-6">
+                        <div>
+                            <h4 class="font-bold mb-2">1. 进入爬虫目录</h4>
+                            <div class="bg-gray-100 dark:bg-dark-border p-3 rounded-lg overflow-x-auto">
+                                <code class="text-sm">cd spider/dudubird-spider</code>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-bold mb-2">2. 安装依赖</h4>
+                            <div class="bg-gray-100 dark:bg-dark-border p-3 rounded-lg overflow-x-auto">
+                                <code class="text-sm">pip install -r requirements.txt</code>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-bold mb-2">3. 启动爬虫服务</h4>
+                            <div class="bg-gray-100 dark:bg-dark-border p-3 rounded-lg overflow-x-auto">
+                                <code class="text-sm">python main.py</code>
+                            </div>
+                        </div>
+                        
+                        <div class="text-sm text-gray-600 dark:text-gray-400 mt-4">
+                            <i class="fa fa-info-circle text-primary mr-2"></i>
+                            确保已安装 Python 3.8+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 配置说明 -->
+    <section id="configuration" class="py-20 px-4 bg-gray-50 dark:bg-dark-elevated">
+        <div class="container mx-auto max-w-6xl">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">配置说明</h2>
+                <p class="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+                    灵活的配置选项，满足不同环境的部署需求
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <!-- 前端配置 -->
+                <div class="bg-white dark:bg-dark-elevated p-8 rounded-xl shadow-lg border border-gray-200 dark:border-dark-border">
+                    <h3 class="text-2xl font-bold mb-6">前端环境配置</h3>
+                    
+                    <div class="space-y-4">
+                        <p class="text-gray-600 dark:text-gray-400">配置文件：<code class="bg-gray-100 dark:bg-dark-border px-2 py-1 rounded">web/.env.development</code></p>
+                        
+                        <div class="bg-gray-100 dark:bg-dark-border p-4 rounded-lg overflow-x-auto">
+                            <pre class="text-sm"><code># 应用标题
+VITE_APP_TITLE = "KurumiShell"
+
+# 前端服务端口
+VITE_APP_PORT = 5666
+
+# API基础URL
+VITE_APP_BASE_URL = "http://localhost:8888"
+
+# 渡渡鸟镜像仓库API地址
+VITE_APP_DUDUBIRD_URL = "http://localhost:8166"
+
+# 轩辕镜像仓库API地址
+VITE_APP_XUANYUAN_URL = "http://localhost:8188"</code></pre>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 后端配置 -->
+                <div class="bg-white dark:bg-dark-elevated p-8 rounded-xl shadow-lg border border-gray-200 dark:border-dark-border">
+                    <h3 class="text-2xl font-bold mb-6">后端配置</h3>
+                    
+                    <div class="space-y-4">
+                        <p class="text-gray-600 dark:text-gray-400">配置文件：<code class="bg-gray-100 dark:bg-dark-border px-2 py-1 rounded">src/main/resources/application.yml</code></p>
+                        
+                        <div class="bg-gray-100 dark:bg-dark-border p-4 rounded-lg overflow-x-auto max-h-96">
+                            <pre class="text-sm"><code># 服务器配置
+server:
+  port: 8888  # 后端服务端口
+  servlet:
+    context-path: /
+    encoding:
+      force: true
+      charset: UTF-8
+      enabled: true
+
+# Spring应用配置
+spring:
+  application:
+    name: KurumiShell
+  # 文件上传配置
+  servlet:
+    multipart:
+      max-file-size: -1  # 不限制单个文件大小
+      max-request-size: -1  # 不限制请求总大小
+  # 数据库配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/kurumi-shell?useSSL=false&serverTimezone=UTC
+    username: root
+    password: Midas888
+  # JPA配置
+  jpa:
+    hibernate:
+      ddl-auto: update  # 自动更新表结构
+    show-sql: true  # 显示SQL语句
+
+# 应用自定义配置
+app:
+  # 管理员用户配置
+  admin:
+    id: admin
+    username: admin
+    password: 666666
+  # JWT配置
+  jwtSecret: XimKNNjYZkYmfw2th28zdj6ByeP3bwPa
+  jwtExpirationMs: 86400000  # JWT过期时间（24小时）</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 免责声明 -->
+    <section class="py-20 px-4">
+        <div class="container mx-auto max-w-6xl">
+            <div class="bg-white dark:bg-dark-elevated p-8 rounded-xl shadow-lg border border-gray-200 dark:border-dark-border">
+                <h3 class="text-2xl font-bold mb-6">爬虫项目免责声明</h3>
+                
+                <div class="space-y-4 text-gray-600 dark:text-gray-400">
+                    <p><strong>数据来源说明：</strong>本项目中的爬虫模块用于从第三方网站获取Docker镜像相关数据，包括渡渡鸟镜像仓库（docker.aityp.com）和轩辕镜像仓库（dockers.xuanyuan.me、xuanyuan.cloud）。</p>
+                    
+                    <p><strong>使用限制：</strong>爬虫获取的数据仅供个人学习和研究使用，不得用于商业目的。使用爬虫功能时，请遵守各第三方网站的使用条款、服务协议和隐私政策，请勿进行高频访问。</p>
+                    
+                    <p><strong>法律责任：</strong>本项目不拥有、控制或保证任何第三方网站数据的准确性、完整性、及时性或可用性。所有镜像数据的知识产权归各自的所有者所有，使用时请遵守相关的版权和知识产权法规。</p>
+                    
+                    <p><strong>风险提示：</strong>第三方网站的接口或页面结构可能随时变更，导致爬虫功能失效。请谨慎使用爬虫获取的数据，对于基于这些数据做出的决策或行动，本项目不承担任何责任。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA 区域 -->
+    <section class="py-20 px-4 bg-primary/10 dark:bg-primary/5">
+        <div class="container mx-auto max-w-4xl text-center">
+            <h2 class="text-3xl md:text-4xl font-bold mb-6">提升您的开发运维效率</h2>
+            <p class="text-lg text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
+                立即使用 KurumiShell，一站式解决SSH管理、Docker镜像搜索和Markdown笔记需求
+            </p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="https://github.com/MidasLee/KurumiShell" target="_blank" rel="noopener noreferrer" class="bg-primary hover:bg-primary/90 text-white font-medium px-8 py-3 rounded-lg transition-custom inline-flex items-center space-x-2 hover-scale">
+                    <i class="fa fa-github"></i>
+                    <span>GitHub</span>
+                </a>
+                <a href="#quick-start" class="bg-white dark:bg-dark-elevated hover:bg-gray-100 dark:hover:bg-dark-border text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-dark-border font-medium px-8 py-3 rounded-lg transition-custom inline-flex items-center space-x-2 hover-scale">
+                    <i class="fa fa-rocket"></i>
+                    <span>立即开始</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="bg-white dark:bg-dark-elevated border-t border-gray-200 dark:border-dark-border py-12 px-4">
+        <div class="container mx-auto max-w-6xl">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+                <div class="flex items-center space-x-2 mb-6 md:mb-0">
+                    <img src="./static/images/kurumi-shell.png" alt="KurumiShell Logo" class="h-10 w-10 rounded-full">
+                    <h2 class="text-2xl font-bold text-primary">KurumiShell</h2>
+                </div>
+                
+                <div class="flex space-x-6">
+                    <a href="https://github.com/MidasLee/KurumiShell" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded-full bg-gray-200 dark:bg-dark-border flex items-center justify-center hover:bg-primary hover:text-white transition-custom">
+                        <i class="fa fa-github"></i>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-200 dark:border-dark-border pt-8">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <p class="text-gray-600 dark:text-gray-400 text-sm mb-4 md:mb-0">
+                        KurumiShell 1.0.0 · Made by Midas.
+                    </p>
+                    <div class="flex space-x-6">
+                        <a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary text-sm transition-custom">QQ:1010500226</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 主题切换功能
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeToggle = document.getElementById('theme-toggle');
+            const html = document.documentElement;
+            
+            // 检查本地存储中的主题偏好
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                html.classList.toggle('dark', savedTheme === 'dark');
+            } else {
+                // 默认根据系统偏好设置主题
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                html.classList.toggle('dark', prefersDark);
+            }
+            
+            // 主题切换事件
+            themeToggle.addEventListener('click', () => {
+                html.classList.toggle('dark');
+                const currentTheme = html.classList.contains('dark') ? 'dark' : 'light';
+                localStorage.setItem('theme', currentTheme);
+                
+                // 手动更新图标显示状态
+                const moonIcon = themeToggle.querySelector('.fa-moon-o');
+                const sunIcon = themeToggle.querySelector('.fa-sun-o');
+                if (moonIcon && sunIcon) {
+                    moonIcon.classList.toggle('hidden', currentTheme === 'dark');
+                    sunIcon.classList.toggle('hidden', currentTheme === 'light');
+                    moonIcon.classList.toggle('dark:hidden', currentTheme === 'light');
+                    sunIcon.classList.toggle('dark:inline-block', currentTheme === 'dark');
+                }
+            });
+        });
+        
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80, // 考虑导航栏高度
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+        
+        // 滚动监听，导航栏样式变化
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 50) {
+                header.classList.add('py-2', 'shadow-md');
+                header.classList.remove('py-4', 'shadow-sm');
+            } else {
+                header.classList.add('py-4', 'shadow-sm');
+                header.classList.remove('py-2', 'shadow-md');
+            }
+        });
+    </script>
+</body>
+</html>
